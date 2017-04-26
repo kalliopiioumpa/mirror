@@ -1,0 +1,64 @@
+# --------------------- VARIABLES INITIATION ---------------------------- info
+
+output_port Oport;
+
+int iResponseTime;
+int iResponse;
+
+int responseCount;
+
+int Response;
+int StartOfRT;
+
+double startOfRT;
+double RT;
+string sFeedback;
+int iCountOld;
+int iTimeStamp;
+int iTrialCount;
+int iTotalTrialCount;
+string sKeyboardInput;
+string SubjectNr;
+array <int> Responses[18];
+array <int> ResponseTimes[18];
+
+
+# -------------------------- FILES -----------------------------
+string sStimFilename;
+string sOutputFilename;
+
+string sListNr;
+string soutputfilename;
+array <string> asFileHeader[0]; ###
+
+# --------------------- INPUT FILE VARIABLES INITIATION ----------------------------;
+input_file inputfile = new input_file;
+int iMaxColumns = 26;
+int iTotalAmountOfTrials = 300; #this used to be 300
+int iRunAmountOfTrials = 1; 
+int NumPracticeTrials = 12;
+#int TrialsPerBlock = 80;
+
+
+array <string> asTrialInputData[iTotalAmountOfTrials][iMaxColumns];	
+array <string> asTrialInputDataPractice[iTotalAmountOfTrials][iMaxColumns];
+
+# --------------------- OUTPUT FILE VARIABLES INITIATION ----------------------------;
+output_file OutputFile = new output_file;
+string TrialData;
+array <string> asWord[iTotalAmountOfTrials];
+array <int> aiFixationTime[iTotalAmountOfTrials];
+array <int> aiWordTime[iTotalAmountOfTrials];
+array <int> aiPictureTime[iTotalAmountOfTrials];
+array <int> aiButtonPressed[iTotalAmountOfTrials];
+array <int> aiButtonTime[iTotalAmountOfTrials];
+
+###  @@@@@
+
+int iDurWait;
+string templog;
+string sSubjectname;
+string outputfilename;
+int iTotalTrials;
+string sSamRating;
+

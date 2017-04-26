@@ -1,0 +1,375 @@
+### subs
+
+include "mirrorINFO.pcl";		# Include all the variables.
+
+
+#### general subs  ####
+
+#-----------------------------Wait------------------------------------
+sub Wait(int iDurWait2) begin
+
+	loop 
+		iTimeStamp = clock.time();
+	until (clock.time() - iTimeStamp >= iDurWait2)
+	begin 
+	end;
+
+end;
+
+#-----------------------------WaitUntilTimeStamp------------------------------------
+sub WaitUntilTimeStamp(int iDurTimestamp) begin
+
+   loop 
+	until clock.time() >= iDurTimestamp
+   begin 
+	end;
+
+end;
+
+#-----------------------------WaitForAllButtonpress------------------------------------
+sub WaitForAllButtonpress begin
+    
+   loop 
+		iCountOld = response_manager.total_response_count()
+   until response_manager.total_response_count() > iCountOld
+   begin 
+	end;
+   
+end;
+
+#-----------------------------WaitForAllButtonpressTime------------------------------------
+sub WaitForAllButtonpressTime( int iDurWait2 ) begin
+
+   loop 
+		iCountOld = response_manager.total_response_count();	
+		iTimeStamp = clock.time();
+	until ((response_manager.total_response_count() > iCountOld) || (clock.time() - iTimeStamp >= iDurWait2))
+   begin 
+	end;
+
+end;
+
+
+#-----------------------------WaitForButtonpress------------------------------------
+sub WaitForButtonpress( int iButton ) begin
+
+   loop 
+		iCountOld = response_manager.total_response_count(iButton)
+   until response_manager.total_response_count(iButton) > iCountOld
+   begin 
+	end;
+
+end;
+
+#--------------------------Get_Kbd_Input-------------------------------------
+sub GetKeyboardInput(string inpstr1) begin
+
+	t_Info1.set_caption(inpstr1);
+	t_Info1.redraw();
+	t_Info2.set_caption(" ");
+	t_Info2.redraw();
+	p_Info.present();
+	system_keyboard.set_case_mode(3); # Hoofdletters mogelijk.
+	sKeyboardInput = system_keyboard.get_input( p_Info, t_Info2 ); # Hier zit de backspace ingebakken.
+
+end;
+
+
+######## SIGEKRIMENA
+
+#-----------------------------Get_stimulus_practice------------------------------------
+sub GetStimulusInputFilePractice(string str ) 
+begin    
+	
+	inputfile.open( str );    
+	inputfile.set_delimiter( '\n' ); 						# for get_line()
+	string sDummy = inputfile.get_line();							# dummy read of the first line, assuming these are headers
+   iRunAmountOfTrials = 0; 
+	loop iTrialCount = 1 until								
+		inputfile.end_of_file() || !inputfile.last_succeeded()
+	begin
+		sDummy = inputfile.get_line();
+		sDummy.split("\t",asTrialInputDataPractice[iTrialCount]);     # asTrialInputData to onoma tou matrix pou exoume apo input
+		iTrialCount = iTrialCount + 1;
+		iRunAmountOfTrials = iRunAmountOfTrials + 1;
+	end;  
+	
+	if !inputfile.last_succeeded() then
+		term.print( "Error - not enough lines in stimuli List\n" )
+	elseif !inputfile.end_of_file() then
+		term.print( "Error - too many lines in stimuli List\n" )
+	end;   
+	inputfile.close();
+  
+end;
+
+
+#####
+
+#-----------------------------Get_stimulus_file------------------------------------ apo tactile
+sub GetStimulusInputFile(string str ) 
+begin    
+	
+	inputfile.open( str );    
+	inputfile.set_delimiter( '\n' ); 						# for get_line()
+	string sDummy = inputfile.get_line();							# dummy read of the first line, assuming these are headers
+   iRunAmountOfTrials = 0; 
+	iTrialCount = 0;
+	sDummy = "";
+	loop iTrialCount = 1 until								
+		inputfile.end_of_file() || !inputfile.last_succeeded()
+	begin
+		sDummy = inputfile.get_line();
+		sDummy.split("\t",asTrialInputData[iTrialCount]);     # asTrialInputData to onoma tou matrix pou exoume apo input
+		iTrialCount = iTrialCount + 1;
+		iRunAmountOfTrials = iRunAmountOfTrials + 1;
+	end;  
+	
+	if !inputfile.last_succeeded() then
+		term.print( "Error - not enough lines in stimuli List\n" )
+	elseif !inputfile.end_of_file() then
+		term.print( "Error - too many lines in stimuli List\n" )
+	end;   
+	inputfile.close();
+  
+end;
+
+
+############################ LOGFILE #######################   
+
+
+#-----------------------------CreateOutput------------------------------------
+sub CreateHeaderOutputFile(string str ) begin
+
+	TrialData = "";
+ 
+	TrialData.append("Trial_nr" + "\t");   
+	
+	#loop int i = 1 
+	#until i > 26    	# gt? arithmos apo stiles? oxi
+	#begin
+	#  TrialData.append(asTrialInputData[1][i] + "\t");
+	#  i = i + 1;
+	#end; 
+
+TrialData.append("Trial_code" + "\t" + "Pic1" + "\t" + "Pic2" + "\t" + "Pic3" + "\t" + "Side_device" + "\t" + "Device" + "\t" + "Congr_spec" + "\t" + "Congr_anatomical" + "\t");
+
+  TrialData.append("Response" + "\t" + "RT" + "\n");
+# same for rt??
+  
+
+   OutputFile.open_append(str); # don't overwrite
+   OutputFile.print( TrialData );
+   OutputFile.close();
+
+end; 
+
+#-----------------------------WriteOutput------------------- ### logika einai se sub run trials
+
+sub WriteTrialToOutputFile(string sNameOutputFile ) begin
+   int i;
+	TrialData = "";
+
+	TrialData.append(string(iTrialCount) + "\t");   #write variable followed by a tab
+	loop i = 1 
+	until i > 8 # itan 5 ti ennoei?
+	begin
+	  TrialData.append(asTrialInputData[iTrialCount][i] + "\t");
+	  i = i + 1;
+	end;
+
+   TrialData.append(string(Response) + "\t");
+   TrialData.append(string(RT) + "\n");
+
+   OutputFile.open_append ( sNameOutputFile ); # append
+   OutputFile.print( TrialData );
+   OutputFile.close();
+        
+end;
+
+### --------  InitialiseTrial  -------- mporei nba vgei nomizo
+
+sub InitialiseTrial
+begin
+  #term.print(asTrialInputData[iTrialCount]);	
+  #term.print("\n");
+  #term.print(asTrialInputData[iTrialCount][2] + "\n"); 
+
+  #vid = new video;
+  #vid.set_filename( asTrialInputData[iTrialCount][2] );			TELEIO @@@@@
+  #vid.prepare();
+  
+	loop
+    int i = 1;
+  until i > 18
+  begin
+    Responses[i] = 0;				# axrista
+    ResponseTimes[i] = 0;			# axrista
+    i = i + 1;
+  end;
+end;
+
+#-----------------------------run-practice------------ 
+
+sub RunPractice begin
+	
+  int iStartOfRT;
+  int iNumResponses;
+  int iStartOfTrial;
+  int i;
+	iRunAmountOfTrials = asTrialInputDataPractice.count();				# kathorizei amount of trials !!!!!
+	loop iTrialCount = 1
+   until iTrialCount > iRunAmountOfTrials
+   begin
+		# experiment 
+		#InitialiseTrial();		# na alllakso
+      p_Fixation.present();
+		#aiFixationTime[iTrialCount] = clock.time(); 		#nomizo dne to xreiazomai
+      Wait(1500);
+      #video_player.play(vid,""); # of asTrialInputData[iTrialCount][2] als tweede parameter
+		
+
+		p_1.unload();
+		p_2.unload();
+		p_3.unload();
+	p_1.set_filename(asTrialInputDataPractice[iTrialCount][2]); # na ftiakso pinaka asImage
+	p_2.set_filename(asTrialInputDataPractice[iTrialCount][3]);
+	p_3.set_filename(asTrialInputDataPractice[iTrialCount][4]);
+		p_1.load();
+		p_2.load();
+		p_3.load();
+	
+		
+
+		main_trial.present();
+		iStartOfRT = 0;
+		StartOfRT = clock.time();
+		RT = 0;
+		Response = 0;
+		WaitForAllButtonpress();
+      
+		loop
+      until Response > 0
+      begin
+	     #if responseCount < response_manager.response_count() 
+        #then
+        #  responseCount = response_manager.response_count();
+		    if ((response_manager.last_response() == 4) || (response_manager.last_response() == 5) || (response_manager.last_response() == 6) || (response_manager.last_response() == 7))then
+		      RT = clock.time() - StartOfRT;
+				Response = response_manager.last_response();
+		    end;
+		  #end;
+	   end;
+	   #WriteTrialToOutputFile(soutputfilename);   # sOutputFilename
+	   Wait(100);
+	   #if iTrialCount == NumPracticeTrials
+	   #then
+		#  EndOfPractice();
+		#elseif (((iTrialCount - NumPracticeTrials)  == 80)) && (iTrialCount != iRunAmountOfTrials)
+		#then
+		#	Pause();
+		#elseif (iTrialCount == NumPracticeTrials + 80 + 86)  && (iTrialCount != iRunAmountOfTrials)
+		#then
+		#	Pause();
+	   #end; 
+   	iTrialCount = iTrialCount + 1;
+		#iTotalTrialCount = iTotalTrialCount + 1;
+   end;
+
+end;
+
+####
+
+
+#-----------------------------runtrials------------
+sub RunTrials begin
+	
+#	asTrialInputData.shuffle( );    #### 
+
+  int iStartOfRT;
+  int iNumResponses;
+  int iStartOfTrial;
+  int i;
+	iRunAmountOfTrials = asTrialInputData.count();				# kathorizei amount of trials !!!!!
+	loop iTrialCount = 1
+   until iTrialCount > iRunAmountOfTrials
+   begin
+		# experiment 
+		#InitialiseTrial();		# na alllakso
+      p_Fixation.present();
+		#aiFixationTime[iTrialCount] = clock.time(); 		#nomizo dne to xreiazomai
+      Wait(1500);
+      #video_player.play(vid,""); # of asTrialInputData[iTrialCount][2] als tweede parameter
+		
+
+		p_1.unload();
+		p_2.unload();
+		p_3.unload();
+	p_1.set_filename(asTrialInputData[iTrialCount][2]); # na ftiakso pinaka asImage
+	p_2.set_filename(asTrialInputData[iTrialCount][3]);
+	p_3.set_filename(asTrialInputData[iTrialCount][4]);
+		p_1.load();
+		p_2.load();
+		p_3.load();
+			
+
+		main_trial.present();
+		iStartOfRT = 0;
+		StartOfRT = clock.time();
+		RT = 0;
+		Response = 0;
+
+
+	#	if (asTrialInputData[iTrialCount][6] == 1)		##	port - tactile pulsed
+	#	then
+	#	Oport.send_code(0); 		# right
+	#	elseif (asTrialInputData[iTrialCount][6] == 2) 
+	#	then
+	#	Oport.send_code(1);		# left
+	#	elseif (asTrialInputData[iTrialCount][6] == 3)
+	#	then
+	#	Oport.send_code(2);		# both
+	#	end;
+			
+			
+		WaitForAllButtonpress();
+      
+		loop
+      until Response > 0
+      begin
+	     #if responseCount < response_manager.response_count() 
+        #then
+        #  responseCount = response_manager.response_count();
+		    if ((response_manager.last_response() == 4) || (response_manager.last_response() == 5) || (response_manager.last_response() == 6) || (response_manager.last_response() == 7))then
+		      RT = clock.time() - StartOfRT;
+				Response = response_manager.last_response();
+		    end;
+		  #end;
+	   end;
+	   WriteTrialToOutputFile(soutputfilename);   # sOutputFilename
+	   Wait(100);
+	
+	   #if iTrialCount == NumPracticeTrials
+	   #then
+		#  EndOfPractice();
+		
+		
+		if(iTrialCount == 240)		# 1st block break
+		then
+		#Pause(); ## end of block
+		WaitForButtonpress(2);  # to be sure will not be accidentally pressed - corresponds to (1)
+		
+		elseif (iTrialCount == 60) || (iTrialCount == 180) || (iTrialCount == 300) || (iTrialCount == 360)
+		then
+		
+#	Pause();		# break
+	   
+   	iTrialCount = iTrialCount + 1;
+		end; 
+		
+   end;
+
+end;
+
+####
+

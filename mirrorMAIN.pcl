@@ -1,0 +1,33 @@
+############################# INITIATION #################################### main
+
+include "mirrorSUBS.pcl";		# Include all the subroutines.
+
+
+GetKeyboardInput ("Please enter subject code: ");
+	sSubjectname = sKeyboardInput;
+
+GetKeyboardInput("list no");
+	sListNr = sKeyboardInput;	
+
+##
+
+GetStimulusInputFilePractice("Practice.txt");								# for practice only - meta
+
+p_Welcome.present();
+WaitForAllButtonpress();
+
+#RunPractice();	
+#p_Practice.present();
+#WaitForAllButtonpress();									
+
+iTotalTrialCount = 1;
+
+GetStimulusInputFile(sListNr + ".txt");	
+soutputfilename = sSubjectname + "_tactile_list_" + sListNr + "_logfile.txt";
+CreateHeaderOutputFile(soutputfilename);
+
+RunTrials(); 
+
+
+#p_End.present();
+
